@@ -1,8 +1,9 @@
 # Python 3 server example
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
+import socket
 
-hostName = "localhost"
+hostName = socket.gethostname()
 serverPort = 8080
 
 class MyServer(BaseHTTPRequestHandler):
