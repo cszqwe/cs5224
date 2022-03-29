@@ -57,6 +57,8 @@ class MyServer(BaseHTTPRequestHandler):
         if sessionId == None:
             sessionId = str(uuid.uuid1())
             r.rpush(tag, sessionId)
+        else:
+            sessionId = str(sessionId)
         response = json.dumps({'sessionId' : sessionId})
         self.wfile.write(bytes(response, encoding='utf8'))
 
