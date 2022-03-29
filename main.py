@@ -40,7 +40,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        response = json.dumps({'matchedUserId' : '123', 'matchedStatus' : 'FINISHED'})
+        response = json.dumps({'sessionId' : '123'})
         self.wfile.write(bytes(response, encoding='utf8'))
 
 if __name__ == "__main__":
