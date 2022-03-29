@@ -12,8 +12,8 @@ pytrends = TrendReq(hl='en-US', tz=360)
 r = redis.Redis(host='taptotagredis.riupow.ng.0001.apse1.cache.amazonaws.com',
     port=6379)
 r.rpush('test1', '1')
-print(r.lpop())
-print(r.lpop())
+print(r.lpop('test1'))
+print(r.lpop('test1'))
 class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         requestPath = self.path
