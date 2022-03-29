@@ -10,8 +10,8 @@ import uuid
 hostName = socket.gethostname()
 serverPort = 8080
 pytrends = TrendReq(hl='en-US', tz=360)
-r = redis.Redis(host='taptotagredis.riupow.ng.0001.apse1.cache.amazonaws.com',
-    port=6379)
+r = redis.StrictRedis(host='taptotagredis.riupow.ng.0001.apse1.cache.amazonaws.com',
+    port=6379, charset="utf-8", decode_responses=True)
 # r.rpush('test1', '1')
 # print(r.lpop('test1'))
 # print(r.lpop('test1'))
