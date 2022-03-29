@@ -2,13 +2,17 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pickle import TRUE
 from pytrends.request import TrendReq
-import time
 import socket
 import json
+import redis
 
 hostName = socket.gethostname()
 serverPort = 8080
-pytrends = TrendReq(hl='en-US', tz=360) 
+pytrends = TrendReq(hl='en-US', tz=360)
+r = redis.Redis(host='taptotagredis.riupow.ng.0001.apse1.cache.amazonaws.com',
+    port=6379)
+r.mset({"Croatia": "Zagreb", "Bahamas": "Nassau"})
+print(r.get("Bahamas"))
 # kw_list = ["Blockchain"]
 # print(pytrends.suggestions("Helllo"))
 # print(pytrends.realtime_trending_searches(pn='US'))
