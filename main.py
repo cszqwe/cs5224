@@ -55,7 +55,7 @@ class MyServer(BaseHTTPRequestHandler):
         # Search whether there is a matched session for this tag.
         sessionId = r.lpop(tag)
         if sessionId == None:
-            sessionId = uuid.uuid1()
+            sessionId = str(uuid.uuid1())
             r.rpush(tag, sessionId)
         response = json.dumps({'sessionId' : sessionId})
         self.wfile.write(bytes(response, encoding='utf8'))
