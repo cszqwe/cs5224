@@ -1,13 +1,17 @@
 # Python 3 server example
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pickle import TRUE
+from pytrends.request import TrendReq
 import time
 import socket
 import json
 
 hostName = socket.gethostname()
 serverPort = 8080
-
+pytrends = TrendReq(hl='en-US', tz=360) 
+# kw_list = ["Blockchain"]
+# print(pytrends.suggestions("Helllo"))
+# print(pytrends.realtime_trending_searches(pn='US'))
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
