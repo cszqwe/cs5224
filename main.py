@@ -3,11 +3,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pytrends.request import TrendReq
 import socket
 import json
-import boto3
 import redis
 import uuid
-import mysql.connector
-import os
 import pymysql    
 import configparser
 
