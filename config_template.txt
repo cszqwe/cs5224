@@ -1,0 +1,5 @@
+[config]
+db_host=host.com
+db_user=user
+db_password=password
+db_name=db_name
