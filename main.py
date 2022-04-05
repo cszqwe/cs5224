@@ -1,11 +1,37 @@
 # Python 3 server example
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pickle import TRUE
 from pytrends.request import TrendReq
 import socket
 import json
+import boto3
 import redis
 import uuid
+import mysql.connector
+import os
+
+ENDPOINT="tagtochatdatabase.ci7oh0wmc7lp.ap-southeast-1.rds.amazonaws.com"
+PORT="3306"
+USER="admin"
+REGION="ap-southeast-1"
+DBNAME="tagtochatdatabase"
+os.environ['LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN'] = '1'
+
+#gets the credentials from .aws/credentials
+session = boto3.Session(profile_name='default')
+client = session.client('rds')
+
+token = client.generate_db_auth_token(DBHostname=ENDPOINT, Port=PORT, DBUsername=USER, Region=REGION)
+
+try:
+    conn =  mysql.connector.connect(host=ENDPOINT, user=USER, passwd=token, port=PORT, database=DBNAME, ssl_ca='SSLCERTIFICATE')
+    cur = conn.cursor()
+    cur.execute("""SELECT now()""")
+    query_results = cur.fetchall()
+    print(query_results)
+except Exception as e:
+    print("Database connection failed due to {}".format(e))          
+                
+
 
 hostName = socket.gethostname()
 serverPort = 8080
@@ -34,7 +60,6 @@ class MyServer(BaseHTTPRequestHandler):
         print(post_body)
         parsedRequst = json.loads(post_body)
         userId = parsedRequst['userId']
-        tag = parsedRequst['tag']
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
