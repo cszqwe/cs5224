@@ -3,31 +3,20 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pytrends.request import TrendReq
 import socket
 import json
-import redis
 import uuid
-import pymysql    
-import configparser
+from config import ConfigManager
+from dbmanager import DbManager
+from redismanager import RedisManager
 
-parser = configparser.ConfigParser()
-parser.read("config.txt")
-host = parser.get("config", "db_host")
-user = parser.get("config", "db_user")
-password = parser.get("config", "db_password")
-name = parser.get("config", "db_name")
-db = pymysql.connect(host=host, user=user, password=password, database=name)
-cursor = db.cursor()
-print(cursor)
-cursor.execute("show tables;")
-result = cursor.fetchone()
-print(result)
+configManager = ConfigManager("config.txt")
+dbHost, dbUser, dbPassword, dbName = configManager.getDbConfig()
+dbManager = DbManager(dbHost, dbUser, dbPassword, dbName)
+redisHost, redisPort = configManager.getRedisConfig()
 hostName = socket.gethostname()
 serverPort = 8080
 pytrends = TrendReq(hl='en-US', tz=360)
-r = redis.StrictRedis(host='taptotagredis.riupow.ng.0001.apse1.cache.amazonaws.com',
-    port=6379, charset="utf-8", decode_responses=True)
-# r.rpush('test1', '1')
-# print(r.lpop('test1'))
-# print(r.lpop('test1'))
+redisInstance = RedisManager(redisHost, redisPort)
+
 class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         requestPath = self.path
@@ -65,10 +54,10 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_header("Content-type", "application/json")
         self.end_headers()
         # Search whether there is a matched session for this tag.
-        sessionId = r.lpop(tag)
+        sessionId = redisInstance.lpop(tag)
         if sessionId == None:
             sessionId = str(uuid.uuid1())
-            r.rpush(tag, sessionId)
+            redisInstance.rpush(tag, sessionId)
         else:
             sessionId = str(sessionId)
         response = json.dumps({'sessionId' : sessionId})
