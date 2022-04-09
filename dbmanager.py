@@ -14,14 +14,12 @@ class DbManager():
 
     def showTables(self):
         self.cursor.execute("show tables;")
-        result = self.cursor.fetchone()
-
+        
     def insertUser(self, userId, userMetaData):        
         self.cursor.execute("""INSERT INTO User(UserId,
          Metadata)
          VALUES ("%s", "%s")""" % (userId, userMetaData))
-        result = self.cursor.fetchone()
-
+        
     def getUser(self, userId):
         self.cursor.execute("SELECT * FROM User WHERE UserId=\"%s\"" % (userId))
         result = self.cursor.fetchone()
@@ -31,4 +29,4 @@ class DbManager():
         self.cursor.execute("""INSERT INTO MatchRecord(UserId,
          Tag)
          VALUES ("%s", "%s")""" % (userId, tag))
-        result = self.cursor.fetchone()
+        
