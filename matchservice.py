@@ -13,4 +13,4 @@ class MatchService():
             self.redis.rpush(tag, sessionId)
         else:
             sessionId = str(sessionId)
-        
+        return sessionId        
