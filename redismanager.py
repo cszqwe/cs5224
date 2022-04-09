@@ -1,5 +1,3 @@
-import configparser
-import pymysql    
 import redis
 
 class RedisManager():

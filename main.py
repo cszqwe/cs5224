@@ -1,23 +1,27 @@
 # Python 3 server example
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from pytrends.request import TrendReq
 import socket
 import json
-import uuid
 from config import ConfigManager
 from dbmanager import DbManager
 from redismanager import RedisManager
+from userservice import UserService
+from matchservice import MatchService
+from tagservice import TagService
 
 configManager = ConfigManager("config.txt")
 dbHost, dbUser, dbPassword, dbName = configManager.getDbConfig()
 dbManager = DbManager(dbHost, dbUser, dbPassword, dbName)
+dbManager.createTables()
 redisHost, redisPort = configManager.getRedisConfig()
 hostName = socket.gethostname()
 serverPort = 8080
-pytrends = TrendReq(hl='en-US', tz=360)
 redisInstance = RedisManager(redisHost, redisPort)
+userService = UserService(dbManager)
+matchService = MatchService(dbManager, redisInstance)
+tagService = TagService()
 
-class MyServer(BaseHTTPRequestHandler):
+class TagToTapServer(BaseHTTPRequestHandler):
     def do_POST(self):
         requestPath = self.path
         print(self.path)
@@ -30,12 +34,12 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(404)
 
     def handleRegister(self):
-        # TODO: Write the userId into the database
         content_len = int(self.headers.get('Content-Length'))
         post_body = self.rfile.read(content_len)
-        print(post_body)
         parsedRequst = json.loads(post_body)
         userId = parsedRequst['userId']
+        metaData = parsedRequst['userMetadata']
+        userService.registerUser(userId, metaData)
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
@@ -49,35 +53,28 @@ class MyServer(BaseHTTPRequestHandler):
         parsedRequst = json.loads(post_body)
         userId = parsedRequst['userId']
         tag = parsedRequst['tag']
-        # TODO: Update user searching history
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        # Search whether there is a matched session for this tag.
-        sessionId = redisInstance.lpop(tag)
-        if sessionId == None:
-            sessionId = str(uuid.uuid1())
-            redisInstance.rpush(tag, sessionId)
-        else:
-            sessionId = str(sessionId)
+        sessionId = matchService.doMatch(userId, tag)
         response = json.dumps({'sessionId' : sessionId})
         self.wfile.write(bytes(response, encoding='utf8'))
 
     def handleGetTag(self):
-        # TODO: Take use of pytrends, to make the random input string matches to a tag
         content_len = int(self.headers.get('Content-Length'))
         post_body = self.rfile.read(content_len)
         print(post_body)
         parsedRequst = json.loads(post_body)
         input = parsedRequst['input']
+        tag = tagService.getTag(input)
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        response = json.dumps({'tag' : input})
+        response = json.dumps({'tag' : tag})
         self.wfile.write(bytes(response, encoding='utf8'))
 
 if __name__ == "__main__":
-    webServer = HTTPServer((hostName, serverPort), MyServer)
+    webServer = HTTPServer((hostName, serverPort), TagToTapServer)
     print("Server started http://%s:%s" % (hostName, serverPort))
 
     try:
